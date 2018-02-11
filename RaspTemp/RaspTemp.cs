@@ -4,18 +4,18 @@ using System.Linq;
 using System.Collections.Generic;
 
 /// @author arto
-/// @version ..2018
+/// @version 11.2.2018
 /// <summary>
 /// 
 /// </summary>
 public class RaspTemp
 {
     /// <summary>
-    /// 
+    /// Testausta vielä
     /// </summary>
     public static void Main()
     {
-        Console.WriteLine("a");
+        Console.WriteLine("Toimii");
     }
 
 }

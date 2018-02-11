@@ -15,7 +15,7 @@ public class RaspTemp
     /// </summary>
     public static void Main()
     {
-
+        Console.WriteLine("a");
     }
 
 }

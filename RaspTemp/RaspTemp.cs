@@ -4,10 +4,10 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 
-/// @author arto
-/// @version 11.2.2018
+/// @author Arto Hopia
+/// @version 16.2.2018
 /// <summary>
-/// 
+/// Ohjelma lukee Raspberryssä 1-wire-anturin tietoa ja näyttää lämpötilan
 /// </summary>
 public class RaspTemp
 {
@@ -16,9 +16,22 @@ public class RaspTemp
     /// </summary>
     public static void Main()
     {
+
+
+        int p = (int)Environment.OSVersion.Platform;    // Käyttöjärjestelmän tunnistus, jotta voidaan valita oikea hakemistopoku
+        if ((p == 4) || (p == 6) || (p == 128))         //  Windowsin ja Rasbianin välillä automaattisesti
+        {
+            Console.WriteLine("Unix");
+        }
+        else
+        {
+            Console.WriteLine("Windows");
+        }
+
         Console.WriteLine();
-        Console.WriteLine("Kakkosversio");
-        String anturipolku = "C:/Ohjelmointi/harjoitustyo/RaspTemp/RaspTemp";
+        Console.WriteLine();
+        String anturipolku = "C:/Ohjelmointi/harjoitustyo/RaspTemp/RaspTemp";   // Hakupolku Windowsiin
+        // String anturipolku = /sys/devices/w1_bus_master1/28-0517027da1ff     // Hakupolku Raspberryyn
         Console.WriteLine(HaeLampo(anturipolku));
         Console.ReadLine();
     }

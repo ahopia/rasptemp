@@ -16,24 +16,38 @@ public class RaspTemp
     /// </summary>
     public static void Main()
     {
-        int p = (int)Environment.OSVersion.Platform;    // Käyttöjärjestelmän tunnistus, jotta voidaan valita oikea hakemistopolku automaattisesti
+        /// <summary>
+        /// Käyttöjärjestelmän tunnistus, jotta voidaan valita oikea hakemistopolku automaattisesti
+        /// </summary>
+        /// <param name="anturipolku">Hakemistopolku, josta löytyy 1-wireanturi hakemistosta /28*</param>
+        /// <param name="w1_slave">Luettava tiedosto</param>
+        /// <returns>Valitsee hakemistopolun käyttöjärjestelmän mukaan</returns> 
+        int p = (int)Environment.OSVersion.Platform;    
         String anturipolku;                             // Hakupolun alustus
         if ((p == 4) || (p == 6) || (p == 128))         // Valinta Windowsin ja Rasbianin välillä automaattisesti
         {
-            Console.WriteLine("Unix");
+            Console.WriteLine("Käyttöjäjestelmä on Linux");
             anturipolku = "/sys/devices/w1_bus_master1/";                    // Hakupolku Raspberryyn
         }
         else
         {
-            Console.WriteLine("Windows");                                    // p=2 Windowsissa 
+            Console.WriteLine("Käyttöjäjestelmä on Windows");                // p=2 Windowsissa 
             anturipolku = "C:/Ohjelmointi/harjoitustyo/RaspTemp/RaspTemp";   // Hakupolku Windowsiin
         }
 
-        Console.WriteLine();
-        Console.WriteLine();
+        Console.WriteLine("\r\n\r\n");
+        //Console.WriteLine();
         Console.WriteLine(HaeLampo(anturipolku));
         Console.ReadLine();
     }
+
+    /// <summary>
+    /// Lukee tiedoston w1_slave sisällön ja parsii sieltä lämpötilan "t=" merkkijonon jälkeen
+    /// </summary>
+    /// <param name="lampoC">Lämpötila Celsius asteina</param>
+    /// <param name="w1_slave">Luettava tiedosto</param>
+    /// <param name="kokoSisalto">Tiedoston sisältö luetaan tähän muuttujaan</param>
+    /// <returns>Valitsee hakemistopolun käyttöjärjestelmän mukaan</returns> 
     public static double HaeLampo(string anturipolku)
     {
         double lampoC= 0.0;

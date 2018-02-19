@@ -26,18 +26,22 @@ public class RaspTemp
         String anturipolku;                             // Hakupolun alustus
         if ((p == 4) || (p == 6) || (p == 128))         // Valinta Windowsin ja Rasbianin välillä automaattisesti
         {
-            Console.WriteLine("Käyttöjäjestelmä on Linux");
+            Console.WriteLine("Käyttöjäjestelmä on Linux");                  // p=4 Linuxissa
             anturipolku = "/sys/devices/w1_bus_master1/";                    // Hakupolku Raspberryyn
         }
         else
         {
-            Console.WriteLine("Käyttöjäjestelmä on Windows");                // p=2 Windowsissa 
+            Console.WriteLine("\r\n Käyttöjäjestelmä on Windows");           // p=2 Windowsissa 
             anturipolku = "C:/Ohjelmointi/harjoitustyo/RaspTemp/RaspTemp";   // Hakupolku Windowsiin
         }
 
         Console.WriteLine("\r\n\r\n");
         //Console.WriteLine();
-        Console.WriteLine(HaeLampo(anturipolku));
+        Console.WriteLine("\r\n " + HaeLampo(anturipolku));
+        double listaanLisays = HaeLampo(anturipolku);   // Haetaan funktiolta lämppötila
+        List<double> lampotilat = new List<double>();   // Luodaan lista lämpötiloille
+        lampotilat.Add(listaanLisays);                  // lisätään lämpötila listaan
+
         Console.ReadLine();
     }
 
@@ -56,11 +60,13 @@ public class RaspTemp
         {
             var kokoSisalto = tiedostoPolku.GetFiles("w1_slave").FirstOrDefault().OpenText().ReadToEnd();
 
-            string lampoTeksti = kokoSisalto.Split(new string[] { "t=" }, StringSplitOptions.RemoveEmptyEntries)[1];
+            //string lampoTeksti = kokoSisalto.Split(new string[] { "t=" }, StringSplitOptions.RemoveEmptyEntries)[1];
+            string[] tiedostonSisalto = kokoSisalto.Split(new string[] { "t=" }, StringSplitOptions.RemoveEmptyEntries); 
+            string lampoTeksti = tiedostonSisalto[1];       
 
             lampoC = double.Parse(lampoTeksti) / 1000;
 
-            Console.WriteLine(string.Format("1-wire-anturin {0} lämpötila {1}C", tiedostoPolku.Name, lampoC));
+            Console.WriteLine(string.Format(" 1-wire-anturin {0} lämpötila {1}C", tiedostoPolku.Name, lampoC));
         }
 
         return lampoC;

@@ -60,11 +60,11 @@ public class RaspTemp
         {
             var kokoSisalto = tiedostoPolku.GetFiles("w1_slave").FirstOrDefault().OpenText().ReadToEnd();
 
-            //string lampoTeksti = kokoSisalto.Split(new string[] { "t=" }, StringSplitOptions.RemoveEmptyEntries)[1];
+            // Jaetaan lämpötilan sisältävä merkkijono kahteen
             string[] tiedostonSisalto = kokoSisalto.Split(new string[] { "t=" }, StringSplitOptions.RemoveEmptyEntries); 
-            string lampoTeksti = tiedostonSisalto[1];       
+            string lampoTeksti = tiedostonSisalto[1];       // Poimitaan merkkijonosta jälkimmäinen, eli lämpötilan sisältävä merkkijono
 
-            lampoC = double.Parse(lampoTeksti) / 1000;
+            lampoC = double.Parse(lampoTeksti) / 1000;      // Muutetaan lämpötila numeeriseksi ja jaetaan tuhannella
 
             Console.WriteLine(string.Format(" 1-wire-anturin {0} lämpötila {1}C", tiedostoPolku.Name, lampoC));
         }

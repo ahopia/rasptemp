@@ -42,7 +42,7 @@ public class RaspTemp
         List<double> lampotilat = new List<double>();   // Luodaan lista lämpötiloille
         lampotilat.Add(listaanLisays);                  // lisätään lämpötila listaan
 
-        CreateFileWatcher(anturipolku + "28-0517027da1ff/");
+        CreateFileWatcher(anturipolku + "28-0517027da1ff/"); // /sys/devices/w1_bus_master1/28-0517027da1ff/
         Console.ReadLine();
     }
 
@@ -94,6 +94,7 @@ public class RaspTemp
 
         // Begin watching.
         watcher.EnableRaisingEvents = true;
+        watcher.IncludeSubdirectories = false;
     }
 
     // Define the event handlers.

@@ -42,7 +42,7 @@ public class RaspTemp
         List<double> lampotilat = new List<double>();   // Luodaan lista lämpötiloille
         lampotilat.Add(listaanLisays);                  // lisätään lämpötila listaan
 
-        CreateFileWatcher(anturipolku);
+        CreateFileWatcher(anturipolku + "28-0517027da1ff/");
         Console.ReadLine();
     }
 

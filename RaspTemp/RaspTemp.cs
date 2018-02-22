@@ -84,7 +84,7 @@ public class RaspTemp
         watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
            | NotifyFilters.FileName | NotifyFilters.DirectoryName;
         // Only watch text files.
-        watcher.Filter = "testi.txt";
+        watcher.Filter = "w1_slave";
 
         // Add event handlers.
         watcher.Changed += new FileSystemEventHandler(OnChanged);

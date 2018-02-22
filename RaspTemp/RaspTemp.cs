@@ -26,6 +26,7 @@ public class RaspTemp
         String anturipolku;                             // Hakupolun alustus
         if ((p == 4) || (p == 6) || (p == 128))         // Valinta Windowsin ja Rasbianin välillä automaattisesti
         {
+            Environment.SetEnvironmentVariable("MONO_MANAGED_WATCHER", "1");
             Console.WriteLine("Käyttöjäjestelmä on Linux");                  // p=4 Linuxissa
             anturipolku = "/sys/devices/w1_bus_master1/";                    // Hakupolku Raspberryyn
         }

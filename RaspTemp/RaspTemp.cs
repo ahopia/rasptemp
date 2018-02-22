@@ -42,7 +42,8 @@ public class RaspTemp
         List<double> lampotilat = new List<double>();   // Luodaan lista lämpötiloille
         lampotilat.Add(listaanLisays);                  // lisätään lämpötila listaan
 
-        CreateFileWatcher(anturipolku + "28-0517027da1ff/"); // /sys/devices/w1_bus_master1/28-0517027da1ff/
+        Console.WriteLine("\n" + anturipolku + "\n");
+        CreateFileWatcher(anturipolku + "28-0517027da1ff"); 
         Console.ReadLine();
     }
 
@@ -76,6 +77,7 @@ public class RaspTemp
     /// *** https://stackoverflow.com/questions/721714/notification-when-a-file-changes
     public static void CreateFileWatcher(string path)
     {
+        Console.WriteLine("Käynnistetty CreateFileWatcher polulla: \n" + path);
         // Create a new FileSystemWatcher and set its properties.
         FileSystemWatcher watcher = new FileSystemWatcher();
         watcher.Path = path;
@@ -95,6 +97,7 @@ public class RaspTemp
         // Begin watching.
         watcher.EnableRaisingEvents = true;
         watcher.IncludeSubdirectories = false;
+        Console.WriteLine("CreateFileWatcher lopussa");
     }
 
     // Define the event handlers.

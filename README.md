@@ -30,7 +30,7 @@ mono RaspTemp.exe
 ````
 git add .
 git commit -m "Kommentti muutoksista"
-Git push -U origin master
+Git push -u origin master
 ````
 
 

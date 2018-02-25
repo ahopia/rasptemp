@@ -1,4 +1,5 @@
 RaspTemp testiä
 
+yes | sudo apt upgrade
 
- 
+

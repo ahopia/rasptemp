@@ -26,5 +26,12 @@ git add RaspTemp/w1_slave
 mcs RaspTemp.cs
 mono RaspTemp.exe
 ````
+##### Mikäli synkronointi Visual Studiolla ei toimi, tee se manuaalisesti
+````
+git add .
+git commit -m "Kommentti muutoksista"
+Git push -U origin master
+````
+
 
 Lisäohjeita https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet

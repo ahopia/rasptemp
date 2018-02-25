@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 
 /// @author Arto Hopia
-/// @version 16.2.2018
+/// @version 25.2.2018
 /// <summary>
 /// Ohjelma lukee Raspberryssä 1-wire-anturin tietoa ja näyttää lämpötilan
 /// </summary>
@@ -38,14 +38,71 @@ public class RaspTemp
 
         Console.WriteLine("\r\n\r\n");
         //Console.WriteLine();
-        Console.WriteLine("\r\n " + HaeLampo(anturipolku));
-        double listaanLisays = HaeLampo(anturipolku);   // Haetaan funktiolta lämppötila
+        Console.WriteLine("\r\n " + HaeLampo(anturipolku) + "\n");
+        double listaanLisays = HaeLampo(anturipolku);   // Haetaan funktiolta lämpötila
+
         List<double> lampotilat = new List<double>();   // Luodaan lista lämpötiloille
         lampotilat.Add(listaanLisays);                  // lisätään lämpötila listaan
+
+        List<double> koeLista = new List<double>();                 // TESTILISTA   UUSI
+        List<double> koeTulos = testiLista(koeLista);               // TESTILISTA   UUSI
+        double koeArvojenTulos = laskeKeskiArvo(koeLista);          // TESTILISTA, KÄYDÄÄN LASKEMASSA KESKIARVO
+
+        double keskiArvo = laskeKeskiArvo(koeLista);                // UUSI kutsutaan keskiarvon (laskeKeskiArvo) laskevaa aliohjelmaa
+        double maxArvo = laskeMaxArvo(koeLista);                    // UUSI kutsutaan Max lämpötilan laskevaa aliohjelmaa
+        double minArvo = laskeMinArvo(koeLista);                    // UUSI kutsutaan Min lämpötilan laskevaa aliohjelmaa
+
+        Console.WriteLine("\nTESTILISTAN KESKIARVO ON {0} \nTESTILISTAN LUKUJEN MÄÄRÄ ON {1}", koeArvojenTulos, koeLista.Count);    // TESTILISTA, TULOSTETAAN KESKIARVO
+        Console.WriteLine("\nTESTILISTAN LUKUJEN MAX ARVO = {0} JA MIN ARVO = {1} ", maxArvo, minArvo);
 
         Console.WriteLine("\n" + anturipolku + "\n");
         // CreateFileWatcher(anturipolku + "28-0517027da1ff"); 
         Console.ReadLine();
+    }
+
+    // LISTAN TESTAUKSEEN, tekee listan                             // TESTILISTA   UUSI
+    public static List<double> testiLista(List<double> koeLista)    // TESTILISTA   UUSI
+    {
+        for (int i = 50; i <= 100; i++)
+        {
+            koeLista.Add(i);
+        }
+        return koeLista;                                            // TESTILISTA   UUSI
+    }
+
+    // lasketaan listan lukemien keskiarvo                          // UUSI KESKIARVO
+    public static double laskeKeskiArvo(List<double> lampotilat)
+    {
+        int jakaja = lampotilat.Count;                              // listan lukujen määrä
+        double summa = 0.0;
+        foreach (double luku in lampotilat)                         // käydään luvut läpi
+        {
+            summa += luku;                                          // lasketaan luvut yhteen
+        }
+        double keskiarvo = summa / jakaja;                          // lasketan keskiarvo
+        return keskiarvo;
+    }
+
+    // hakee taulukon lukujen max arvon                             // UUSI MAXARVO
+    public static double laskeMaxArvo(List<double> lampotilat)
+    {
+        double max = lampotilat[0];                                 // alustetaan max arvo listan ensimmäisellä luvulla
+        foreach (double luku in lampotilat)
+        {
+            if (max <= luku) max = luku;
+        }
+        return max;
+    }
+
+    // hakee taulukon lukujen min arvon                             // UUSI MINARVO
+    public static double laskeMinArvo(List<double> lampotilat)
+    {
+        double min = lampotilat[0];                                 // alustetaan min arvo listan ensimmäisellä luvulla
+        foreach (double luku in lampotilat)
+        {
+            if (min >= luku) min = luku;
+        }
+        return min;
     }
 
     /// <summary>
@@ -88,6 +145,8 @@ public class RaspTemp
            | NotifyFilters.FileName | NotifyFilters.DirectoryName;
         // Only watch text files.
         watcher.Filter = "w1_slave";
+
+        Console.WriteLine("1.  Tulostetaan polku = " + path);
 
         // Add event handlers.
         watcher.Changed += new FileSystemEventHandler(OnChanged);

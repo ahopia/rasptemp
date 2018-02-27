@@ -23,8 +23,8 @@ public class RaspTemp
         /// <param name="w1_slave">Luettava tiedosto</param>
         /// <returns>Valitsee hakemistopolun käyttöjärjestelmän mukaan</returns> 
         int p = (int)Environment.OSVersion.Platform;
-        String anturipolku;                             // Hakupolun alustus
-        if ((p == 4) || (p == 6) || (p == 128))         // Valinta Windowsin ja Rasbianin välillä automaattisesti
+        String anturipolku;                                                  // Hakupolun alustus
+        if ((p == 4) || (p == 6) || (p == 128))                              // Valinta Windowsin ja Rasbianin välillä automaattisesti
         {
             Environment.SetEnvironmentVariable("MONO_MANAGED_WATCHER", "1");
             Console.WriteLine("Käyttöjäjestelmä on Linux");                  // p=4 Linuxissa
@@ -36,16 +36,18 @@ public class RaspTemp
             anturipolku = "C:/Ohjelmointi/harjoitustyo/RaspTemp/RaspTemp";   // Hakupolku Windowsiin
         }
 
-        Console.WriteLine("\r\n\r\n");
+        Console.WriteLine("\r\n");
         //Console.WriteLine();
-        Console.WriteLine("\r\n " + HaeLampo(anturipolku) + "\n");
-        double listaanLisays = HaeLampo(anturipolku);   // Haetaan funktiolta lämpötila
+        // Console.WriteLine("\r\n " + HaeLampo(anturipolku) + "\n");
+        double listaanLisays = HaeLampo(anturipolku);                        // Haetaan funktiolta lämpötila
 
-        List<double> lampotilat = new List<double>();   // Luodaan lista lämpötiloille
-        lampotilat.Add(listaanLisays);                  // lisätään lämpötila listaan
+        var timer1 = new System.Threading.Timer(_ => Console.WriteLine(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN ***********
 
-        List<double> koeLista = new List<double>();                 // TESTILISTA   UUSI
-        List<double> koeTulos = testiLista(koeLista);               // TESTILISTA   UUSI
+        List<double> lampotilat = new List<double>();               // Luodaan lista lämpötiloille
+        lampotilat.Add(listaanLisays);                              // lisätään lämpötila listaan
+
+        List<double> koeLista = new List<double>();                 // TESTILISTA   
+        List<double> koeTulos = testiLista(koeLista);               // TESTILISTA   
         double koeArvojenTulos = laskeKeskiArvo(koeLista);          // TESTILISTA, KÄYDÄÄN LASKEMASSA KESKIARVO
 
         double keskiArvo = laskeKeskiArvo(koeLista);                // UUSI kutsutaan keskiarvon (laskeKeskiArvo) laskevaa aliohjelmaa
@@ -60,17 +62,17 @@ public class RaspTemp
         Console.ReadLine();
     }
 
-    // LISTAN TESTAUKSEEN, tekee listan                             // TESTILISTA   UUSI
-    public static List<double> testiLista(List<double> koeLista)    // TESTILISTA   UUSI
+    // LISTAN TESTAUKSEEN, tekee listan                             // LUODAAN TESTILISTA TESTAUKSEEN
+    public static List<double> testiLista(List<double> koeLista)    // TESTILISTA   
     {
         for (int i = 50; i <= 100; i++)
         {
             koeLista.Add(i);
         }
-        return koeLista;                                            // TESTILISTA   UUSI
+        return koeLista;
     }
 
-    // lasketaan listan lukemien keskiarvo                          // UUSI KESKIARVO
+    // lasketaan listan lukemien keskiarvo                          // KESKIARVO
     public static double laskeKeskiArvo(List<double> lampotilat)
     {
         int jakaja = lampotilat.Count;                              // listan lukujen määrä
@@ -83,7 +85,7 @@ public class RaspTemp
         return keskiarvo;
     }
 
-    // hakee taulukon lukujen max arvon                             // UUSI MAXARVO
+    // hakee taulukon lukujen max arvon                             // MAXARVO
     public static double laskeMaxArvo(List<double> lampotilat)
     {
         double max = lampotilat[0];                                 // alustetaan max arvo listan ensimmäisellä luvulla
@@ -94,7 +96,7 @@ public class RaspTemp
         return max;
     }
 
-    // hakee taulukon lukujen min arvon                             // UUSI MINARVO
+    // hakee taulukon lukujen min arvon                             // MINARVO
     public static double laskeMinArvo(List<double> lampotilat)
     {
         double min = lampotilat[0];                                 // alustetaan min arvo listan ensimmäisellä luvulla
@@ -122,17 +124,19 @@ public class RaspTemp
 
             // Jaetaan lämpötilan sisältävä merkkijono kahteen
             string[] tiedostonSisalto = kokoSisalto.Split(new string[] { "t=" }, StringSplitOptions.RemoveEmptyEntries);
-            string lampoTeksti = tiedostonSisalto[1];       // Poimitaan merkkijonosta jälkimmäinen, eli lämpötilan sisältävä merkkijono
+            string lampoTeksti = tiedostonSisalto[1];                           // Poimitaan merkkijonosta jälkimmäinen, eli lämpötilan sisältävä merkkijono
 
-            lampoC = double.Parse(lampoTeksti) / 1000;      // Muutetaan lämpötila numeeriseksi ja jaetaan tuhannella
+            lampoC = double.Parse(lampoTeksti) / 1000;                          // Muutetaan lämpötila numeeriseksi ja jaetaan tuhannella
 
-            Console.WriteLine(string.Format(" 1-wire-anturin {0} lämpötila {1}C", tiedostoPolku.Name, lampoC));
+            // Console.WriteLine(string.Format(" 1-wire-anturin {0} lämpötila {1}C", tiedostoPolku.Name, lampoC));
         }
 
         return lampoC;
     }
 
-    /// *** https://stackoverflow.com/questions/721714/notification-when-a-file-changes
+
+    // *** tiedoston muutoksiin reagointi,VOI POISTAA ???
+    // *** https://stackoverflow.com/questions/721714/notification-when-a-file-changes
     public static void CreateFileWatcher(string path)
     {
         Console.WriteLine("Käynnistetty CreateFileWatcher polulla: \n" + path);

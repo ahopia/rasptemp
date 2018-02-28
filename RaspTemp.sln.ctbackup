@@ -1,10 +1,9 @@
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaspTemp", "RaspTemp\RaspTemp.csproj", "{7D748B4E-8542-48A8-A7EF-9E359590CBCF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaspTempTest", "RaspTempTest\RaspTempTest.csproj", "{430D31CA-0F9B-49F1-B2C0-65A065AA4E4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,15 +15,11 @@ Global
 		{7D748B4E-8542-48A8-A7EF-9E359590CBCF}.Debug|x86.Build.0 = Debug|x86
 		{7D748B4E-8542-48A8-A7EF-9E359590CBCF}.Release|x86.ActiveCfg = Release|x86
 		{7D748B4E-8542-48A8-A7EF-9E359590CBCF}.Release|x86.Build.0 = Release|x86
-		{430D31CA-0F9B-49F1-B2C0-65A065AA4E4E}.Debug|x86.ActiveCfg = Debug|x86
-		{430D31CA-0F9B-49F1-B2C0-65A065AA4E4E}.Debug|x86.Build.0 = Debug|x86
-		{430D31CA-0F9B-49F1-B2C0-65A065AA4E4E}.Release|x86.ActiveCfg = Release|x86
-		{430D31CA-0F9B-49F1-B2C0-65A065AA4E4E}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {50E1EDFE-55C5-47EC-8B56-C1E4FEC6FAEB}
+		SolutionGuid = {CEFF2436-EDDD-4737-8D52-A36DE02C6D09}
 	EndGlobalSection
 EndGlobal

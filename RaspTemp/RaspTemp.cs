@@ -33,7 +33,7 @@ public class RaspTemp
         else
         {
             Console.WriteLine("Käyttöjäjestelmä on Windows");                // p=2 Windowsissa 
-            anturipolku = "C:/Ohjelmointi/harjoitustyo/RaspTemp/RaspTemp";   // Hakupolku Windowsiin
+            anturipolku = @"C:\MyTemp\areehopi\trunk\RaspTemp\RaspTemp";   // Hakupolku Windowsiin
         }
 
 
@@ -45,7 +45,7 @@ public class RaspTemp
          * tyhjennä näyttö 
          */
 
-        bool lopeta = true;
+        // bool lopeta = true;
         // while (lopeta == true)                                        // tarvitaanko silmukkaa
         // {                                                             // TEE PÄÄTTYMÄTÖN SILMUKKA 
         Console.WriteLine(" ");
@@ -55,8 +55,13 @@ public class RaspTemp
         List<double> lampotilat = new List<double>();               // Luodaan lista lämpötiloille
 
         // var timer1 = new System.Threading.Timer(_ => Console.WriteLine(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
-        var timer1 = new System.Threading.Timer(_ => lampotilat.Add(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
-        var timer2 = new System.Threading.Timer(_ => Console.WriteLine(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
+        var timer1 = new System.Threading.Timer(delegate
+        {
+            lampotilat.Add(HaeLampo(anturipolku));
+            /// ...
+        },
+        null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
+        //  var timer2 = new System.Threading.Timer(_ => Console.WriteLine(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
         lampotilat.Add(listaanLisays);                              // lisätään lämpötila listaan
 
         List<double> koeLista = new List<double>();                 // TESTILISTA ALUSTETAAN  

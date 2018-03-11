@@ -24,7 +24,7 @@ public class RaspTemp
         /// <param name="anturipolku">Anturin polku</param>
         int p = (int)Environment.OSVersion.Platform;
         String anturipolku;                                                  // Hakupolun alustus
-        if ((p == 4) || (p == 6) || (p == 128))                              // Valinta Windowsin ja Rasbianin välillä automaattisesti
+        if ((p == 4) || (p == 6))                                            // Valinta Windowsin ja Rasbianin välillä automaattisesti
         {
             Environment.SetEnvironmentVariable("MONO_MANAGED_WATCHER", "1");
             Console.WriteLine("Käyttöjäjestelmä on Linux");                  // p=4 Linuxissa
@@ -33,7 +33,7 @@ public class RaspTemp
         else
         {
             Console.WriteLine("Käyttöjäjestelmä on Windows");                // p=2 Windowsissa 
-            anturipolku = @"C:\MyTemp\areehopi\trunk\RaspTemp\RaspTemp";   // Hakupolku Windowsiin
+            anturipolku = "C:/Ohjelmointi/harjoitustyo/RaspTemp/RaspTemp";   // Hakupolku Windowsiin
         }
 
 
@@ -54,13 +54,20 @@ public class RaspTemp
         double listaanLisays = HaeLampo(anturipolku);               // Haetaan funktiolta lämpötila
         List<double> lampotilat = new List<double>();               // Luodaan lista lämpötiloille
 
+        // var timer1 = new System.Threading.Timer(_ => lampotilat.Add(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
+        var timer2 = new System.Threading.Timer(_ => Console.WriteLine(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
+
+
         // var timer1 = new System.Threading.Timer(_ => Console.WriteLine(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
         var timer1 = new System.Threading.Timer(delegate
         {
-            lampotilat.Add(HaeLampo(anturipolku));
+            lampotilat.Add(HaeLampo(anturipolku));  // lisää: lämpötilan luku
+
             /// ...
         },
         null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
+
+
         //  var timer2 = new System.Threading.Timer(_ => Console.WriteLine(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
         lampotilat.Add(listaanLisays);                              // lisätään lämpötila listaan
 
@@ -186,48 +193,6 @@ public class RaspTemp
             if (min >= luku) min = luku;
         }
         return min;
-    }
-
-
-    // *** tiedoston muutoksiin reagointi,VOI POISTAA ???
-    public static void CreateFileWatcher(string path)
-    {
-        Console.WriteLine("Käynnistetty CreateFileWatcher polulla: \n" + path);
-        // Create a new FileSystemWatcher and set its properties.
-        FileSystemWatcher watcher = new FileSystemWatcher();
-        watcher.Path = path;
-        /* Watch for changes in LastAccess and LastWrite times, and 
-           the renaming of files or directories. */
-        watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
-           | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-        // Only watch text files.
-        watcher.Filter = "w1_slave";
-
-        Console.WriteLine("1.  Tulostetaan polku = " + path);
-
-        // Add event handlers.
-        watcher.Changed += new FileSystemEventHandler(OnChanged);
-        watcher.Created += new FileSystemEventHandler(OnChanged);
-        watcher.Deleted += new FileSystemEventHandler(OnChanged);
-        watcher.Renamed += new RenamedEventHandler(OnRenamed);
-
-        // Begin watching.
-        watcher.EnableRaisingEvents = true;
-        watcher.IncludeSubdirectories = false;
-        Console.WriteLine("CreateFileWatcher lopussa");
-    }
-
-    // Define the event handlers.
-    private static void OnChanged(object source, FileSystemEventArgs e)
-    {
-        // Specify what is done when a file is changed, created, or deleted.
-        Console.WriteLine("File: " + e.FullPath + " " + e.ChangeType);
-    }
-
-    private static void OnRenamed(object source, RenamedEventArgs e)
-    {
-        // Specify what is done when a file is renamed.
-        Console.WriteLine("File: {0} renamed to {1}", e.OldFullPath, e.FullPath);
     }
 
 

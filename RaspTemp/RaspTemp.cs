@@ -45,47 +45,35 @@ public class RaspTemp
          * tyhjennä näyttö 
          */
 
-        // bool lopeta = true;
-        // while (lopeta == true)                                        // tarvitaanko silmukkaa
-        // {                                                             // TEE PÄÄTTYMÄTÖN SILMUKKA 
         Console.WriteLine(" ");
         //Console.WriteLine();
         // Console.WriteLine("\r\n " + HaeLampo(anturipolku) + "\n");
         double listaanLisays = HaeLampo(anturipolku);               // Haetaan funktiolta lämpötila
         List<double> lampotilat = new List<double>();               // Luodaan lista lämpötiloille
 
-        // var timer1 = new System.Threading.Timer(_ => lampotilat.Add(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
-        var timer2 = new System.Threading.Timer(_ => Console.WriteLine(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
 
-
-        // var timer1 = new System.Threading.Timer(_ => Console.WriteLine(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
         var timer1 = new System.Threading.Timer(delegate
         {
-            lampotilat.Add(HaeLampo(anturipolku));  // lisää: lämpötilan luku
+            lampotilat.Add(HaeLampo(anturipolku));                        // lisää: lämpötilan luku
+            Console.WriteLine("Timer1 sisältä  " + HaeLampo(anturipolku));
+            // Console.WriteLine("Timer1 sisältä lampötilat:  " + string.Join(" ", lampotilat[0]));
+
+            double keskiArvo = LaskeKeskiArvo(lampotilat);                // Kutsutaan keskiarvon laskevaa aliohjelmaa
+            double maxArvo = LaskeMaxArvo(lampotilat);                    // Kutsutaan Max lämpötilan laskevaa aliohjelmaa
+            double minArvo = LaskeMinArvo(lampotilat);                    // Kutsutaan Min lämpötilan laskevaa aliohjelmaa
+
+            Console.WriteLine("\nTimer1: Lukujen määrä on {0}", lampotilat.Count);
+            Console.WriteLine("\nTimer1: MIN = {0} KESKIARVO = {1}  MAX  = {2} ", minArvo, keskiArvo, maxArvo);
 
             /// ...
         },
         null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
 
 
-        //  var timer2 = new System.Threading.Timer(_ => Console.WriteLine(HaeLampo(anturipolku)), null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
         lampotilat.Add(listaanLisays);                              // lisätään lämpötila listaan
 
-        List<double> koeLista = new List<double>();                 // TESTILISTA ALUSTETAAN  
-        List<double> koeTulos = testiLista(koeLista);               // TESTILISTA LISÄTÄÄN TESTAUSTA VARTEN LUKUJA ALIOHJELMASSA  
-        double koeArvojenTulos = LaskeKeskiArvo(koeLista);          // TESTILISTA, KÄYDÄÄN LASKEMASSA KESKIARVO
-
-        double keskiArvo = LaskeKeskiArvo(koeLista);                // Kutsutaan keskiarvon laskevaa aliohjelmaa
-        double maxArvo = LaskeMaxArvo(koeLista);                    // Kutsutaan Max lämpötilan laskevaa aliohjelmaa
-        double minArvo = LaskeMinArvo(koeLista);                    // Kutsutaan Min lämpötilan laskevaa aliohjelmaa
-
-        Console.WriteLine("\nTESTILISTAN KESKIARVO ON {0} \nTESTILISTAN LUKUJEN MÄÄRÄ ON {1}", koeArvojenTulos, koeLista.Count);    // TESTILISTA, TULOSTETAAN KESKIARVO
-        Console.WriteLine("\nTESTILISTAN LUKUJEN MAX ARVO = {0} JA MIN ARVO = {1} ", maxArvo, minArvo);
-
         Console.WriteLine("\n" + anturipolku + "\n");
-        // CreateFileWatcher(anturipolku + "28-0517027da1ff"); 
         Console.ReadLine();
-        //}
     }
 
     /// <summary>
@@ -122,17 +110,7 @@ public class RaspTemp
         return koeLista;
     }
 
-    /// <summary>
-    /// Lasketaan listan lukemien keskiarvo
-    /// </summary>
-    /// <param name="lampotilat">Lista lämpötiloista</param>
-    /// <returns>Palauttaa lämpötilojen keskiarvon</returns> 
-    /// <example>
-    /// <pre name="test">
-    ///  RaspTemp.LaskeKeskiArvo(new List<double>() {5.0, 15.0 }) ~~~ 10.0; 
-    /// </pre>
-    /// </example>
-    public static double LaskeKeskiArvo(List<double> lampotilat)
+    public static double LaskeKeskiArvo(List<double> lampotilat)    // Laskee keskiarvon
     {
         int jakaja = lampotilat.Count;                              // listan lukujen määrä
         double summa = 0.0;
@@ -144,24 +122,10 @@ public class RaspTemp
         return keskiarvo;
     }
 
-    /// <summary>
-    /// Laskee taulukon lukujen max arvon   
-    /// </summary>
-    /// <param name="lampotilat">Lista lämpötiloista</param>
-    /// <returns>Palauttaa lämpötilojen maksimiarvon</returns> 
-    /// <example>
-    /// <pre name="test">
-    /// RaspTemp.LaskeMaxArvo(new List<double>() {}) ~~~ Double.MinValue; 
-    /// RaspTemp.LaskeMaxArvo(new List<double>() {1.0, 20.0, 25.0}) ~~~ 25.0;
-    /// RaspTemp.LaskeMaxArvo(new List<double>() {23.0, 56.0, 12.0}) ~~~ 56.0;
-    /// RaspTemp.LaskeMaxArvo(new List<double>() {14.0, 13.0, 8.0}) ~~~ 14.0;
-    /// RaspTemp.LaskeMaxArvo(new List<double>() {3.0, 7.0, 1.8}) ~~~ 7.0;
-    /// </pre>
-    /// </example>
-    public static double LaskeMaxArvo(List<double> lampotilat)
+    public static double LaskeMaxArvo(List<double> lampotilat)      // laskee Max arvon
     {
         double max = Double.MinValue;
-        if (lampotilat.Count > 0) max = lampotilat[0];                                 // alustetaan max arvo listan ensimmäisellä luvulla
+        if (lampotilat.Count > 0) max = lampotilat[0];               // alustetaan max arvo listan ensimmäisellä luvulla
         foreach (double luku in lampotilat)
         {
             if (max <= luku) max = luku;
@@ -169,25 +133,10 @@ public class RaspTemp
         return max;
     }
 
-    /// <summary>
-    /// Laskee taulukon lukujen min arvon   
-    /// </summary>
-    /// <param name="lampotilat">Lista lämpötiloista</param>
-    /// <returns>Palauttaa lämpötilojen minimiarvon</returns>  
-    /// <example>
-    /// <pre name="test">
-    /// RaspTemp.LaskeMinArvo(new List<double>() {}) ~~~ Double.MaxValue; 
-    /// RaspTemp.LaskeMinArvo(new List<double>() {1.0, 20.0, 25.0}) ~~~ 1.0;
-    /// RaspTemp.LaskeMinArvo(new List<double>() {23.0, 56.0, 12.0}) ~~~ 12.0;
-    /// RaspTemp.LaskeMinArvo(new List<double>() {14.0, 13.0, 8.0}) ~~~ 8.0;
-    /// RaspTemp.LaskeMinArvo(new List<double>() {3.0, 7.0}) ~~~ 3.0;
-    /// RaspTemp.LaskeMinArvo(new List<double>() {3.0}) ~~~ 3.0;
-    /// </pre>
-    /// </example>
-    public static double LaskeMinArvo(List<double> lampotilat)
+    public static double LaskeMinArvo(List<double> lampotilat)      // laskee Max arvon
     {
         double min = Double.MaxValue;
-        if (lampotilat.Count > 0) min = lampotilat[0];                                 // alustetaan min arvo listan ensimmäisellä luvulla
+        if (lampotilat.Count > 0) min = lampotilat[0];              // alustetaan min arvo listan ensimmäisellä luvulla
         foreach (double luku in lampotilat)
         {
             if (min >= luku) min = luku;

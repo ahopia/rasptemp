@@ -63,7 +63,7 @@ public class RaspTemp
             double minArvo = LaskeMinArvo(lampotilat);                    // Kutsutaan Min lämpötilan laskevaa aliohjelmaa
 
             Console.WriteLine("\nTimer1: Lukujen määrä on {0}", lampotilat.Count);
-            Console.WriteLine("\nTimer1: MIN = {0} KESKIARVO = {1}  MAX  = {2} ", minArvo, keskiArvo, maxArvo);
+            Console.WriteLine("\nTimer1: MIN = {0:00.00} KESKIARVO = {1:00.00}  MAX  = {2:00.00} ", minArvo, keskiArvo, maxArvo);
 
             /// ...
         },

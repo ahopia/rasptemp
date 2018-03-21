@@ -1,11 +1,16 @@
-﻿using System;
+﻿// This example demonstrates the 
+//     Console.CursorLeft and 
+//     Console.CursorTop properties, and the
+//     Console.SetCursorPosition and 
+//     Console.Clear methods.
+using System;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 
 /// @author Arto Hopia
-/// @version 25.2.2018
+/// @version 21.3.2018
 /// <summary>
 /// Ohjelma lukee Raspberryssä 1-wire-anturin tietoa ja näyttää lämpötilan
 /// </summary>
@@ -27,52 +32,71 @@ public class RaspTemp
         if ((p == 4) || (p == 6))                                            // Valinta Windowsin ja Rasbianin välillä automaattisesti
         {
             Environment.SetEnvironmentVariable("MONO_MANAGED_WATCHER", "1");
-            Console.WriteLine("Käyttöjäjestelmä on Linux");                  // p=4 Linuxissa
+            //  Console.WriteLine("Käyttöjäjestelmä on Linux");                  // p=4 Linuxissa
             anturipolku = "/sys/devices/w1_bus_master1/";                    // Hakupolku Raspberryyn
         }
         else
         {
-            Console.WriteLine("Käyttöjäjestelmä on Windows");                // p=2 Windowsissa 
+            //  Console.WriteLine("Käyttöjäjestelmä on Windows");                // p=2 Windowsissa 
             anturipolku = "C:/Ohjelmointi/harjoitustyo/RaspTemp/RaspTemp";   // Hakupolku Windowsiin
         }
 
 
-        /* TEE NÄMÄ: 
-         * lisää mittausajankohta
-         * lisää tieto arvojen kokonaismäärästä
-         * mittauksen alkuajankohta
-         * lisää keskitys
-         * tyhjennä näyttö 
-         */
+        // Tyhjennä näyttö, tallenna alkukoordinaatit, ylin ja vasemmanpuoleisin
+        // Console.Clear();
+        nollaRivi = Console.CursorTop + 2;      // tuunaa nollarivi sopivaan kohtaan
+        nollaSarake = Console.CursorLeft + 5;   // tuunaa nollasarake sopivaan kohtaan
+
+        //
+        // Tulosta("Toimii", 10, 16);
+        // Tulosta("ARTON TESTITULOSTUS", 8, -1);
+        Console.WriteLine();
 
         Console.WriteLine(" ");
         //Console.WriteLine();
         // Console.WriteLine("\r\n " + HaeLampo(anturipolku) + "\n");
         double listaanLisays = HaeLampo(anturipolku);               // Haetaan funktiolta lämpötila
         List<double> lampotilat = new List<double>();               // Luodaan lista lämpötiloille
-
+        string minPvm = DateTime.Now.ToString("dd.MM.yyyy");
+        string minKlo = DateTime.Now.ToString("HH:mm:ss");
+        string maxPvm = DateTime.Now.ToString("dd.MM.yyyy");
+        string maxKlo = DateTime.Now.ToString("HH:mm:ss");
 
         var timer1 = new System.Threading.Timer(delegate
         {
             lampotilat.Add(HaeLampo(anturipolku));                        // lisää: lämpötilan luku
-            Console.WriteLine("Timer1 sisältä  " + HaeLampo(anturipolku));
-            // Console.WriteLine("Timer1 sisältä lampötilat:  " + string.Join(" ", lampotilat[0]));
+                                                                          //  Console.WriteLine("Timer1 sisältä  " + HaeLampo(anturipolku));
+                                                                          // Console.WriteLine("Timer1 sisältä lampötilat:  " + string.Join(" ", lampotilat[0]));
 
             double keskiArvo = LaskeKeskiArvo(lampotilat);                // Kutsutaan keskiarvon laskevaa aliohjelmaa
             double maxArvo = LaskeMaxArvo(lampotilat);                    // Kutsutaan Max lämpötilan laskevaa aliohjelmaa
             double minArvo = LaskeMinArvo(lampotilat);                    // Kutsutaan Min lämpötilan laskevaa aliohjelmaa
 
-            Console.WriteLine("\nTimer1: Lukujen määrä on {0}", lampotilat.Count);
-            Console.WriteLine("\nTimer1: MIN = {0:00.00} KESKIARVO = {1:00.00}  MAX  = {2:00.00} ", minArvo, keskiArvo, maxArvo);
+            Tulosta("L Ä M P Ö T I L A T", 24, 0);
+            Tulosta("Min", 9, 3);
+            Tulosta("Keskiarvo", 28, 3);
+            Tulosta("Max", 51, 3);
 
-            /// ...
+            Tulosta(minArvo.ToString(), 7, 5);
+            Tulosta(keskiArvo.ToString(), 29, 5);
+            Tulosta(maxArvo.ToString(), 50, 5);
+
+            Tulosta("Lukujen määrä", 26, 8);
+            Tulosta(lampotilat.Count.ToString(), 31, 10);       // tulostaa lukujen määrän
+
+            Tulosta(minPvm, 6, 7);
+            Tulosta(minKlo, 7, 8);
+            Tulosta(maxPvm, 48, 7);
+            Tulosta(maxKlo, 49, 8);
+
+
         },
         null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
 
 
         lampotilat.Add(listaanLisays);                              // lisätään lämpötila listaan
 
-        Console.WriteLine("\n" + anturipolku + "\n");
+        // Console.WriteLine("\n" + anturipolku + "\n");
         Console.ReadLine();
     }
 
@@ -100,24 +124,12 @@ public class RaspTemp
         return lampoC;
     }
 
-    // LISTAN VAIN TESTAUKSEEN, tekee listan                             
-    public static List<double> testiLista(List<double> koeLista)    // LUODAAN TESTILISTA TESTAUKSEEN
-    {
-        for (int i = 50; i <= 100; i++)
-        {
-            koeLista.Add(i);
-        }
-        return koeLista;
-    }
 
     public static double LaskeKeskiArvo(List<double> lampotilat)    // Laskee keskiarvon
     {
         int jakaja = lampotilat.Count;                              // listan lukujen määrä
         double summa = 0.0;
-        foreach (double luku in lampotilat)                         // käydään luvut läpi
-        {
-            summa += luku;                                          // lasketaan luvut yhteen
-        }
+        foreach (double luku in lampotilat) summa += luku;                         // käydään luvut läpi// lasketaan luvut yhteen
         double keskiarvo = summa / jakaja;                          // lasketan keskiarvo
         return keskiarvo;
     }
@@ -126,10 +138,7 @@ public class RaspTemp
     {
         double max = Double.MinValue;
         if (lampotilat.Count > 0) max = lampotilat[0];               // alustetaan max arvo listan ensimmäisellä luvulla
-        foreach (double luku in lampotilat)
-        {
-            if (max <= luku) max = luku;
-        }
+        foreach (double luku in lampotilat) if (max <= luku) max = luku;
         return max;
     }
 
@@ -137,11 +146,30 @@ public class RaspTemp
     {
         double min = Double.MaxValue;
         if (lampotilat.Count > 0) min = lampotilat[0];              // alustetaan min arvo listan ensimmäisellä luvulla
-        foreach (double luku in lampotilat)
-        {
-            if (min >= luku) min = luku;
-        }
+        foreach (double luku in lampotilat) if (min >= luku) min = luku;
         return min;
+    }
+
+
+
+    public static int nollaRivi;
+    public static int nollaSarake;
+
+    public static void Tulosta(string viesti, int x, int y)                 // TULOSTUS
+    {
+        try
+        {
+            Console.SetCursorPosition(nollaSarake + x, nollaRivi + y);        // NÄILLÄ SAA TULOSTUMAAN OIKEAAN KOHTAAN
+                                                                              // Console.ForegroundColor = ConsoleColor.DarkYellow;
+                                                                              // Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(viesti);
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            Console.Clear();
+            Console.WriteLine(e.Message);
+        }
+
     }
 
 

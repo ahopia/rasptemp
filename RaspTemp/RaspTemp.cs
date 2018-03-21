@@ -57,7 +57,7 @@ public class RaspTemp
         // Console.WriteLine("\r\n " + HaeLampo(anturipolku) + "\n");
         double listaanLisays = HaeLampo(anturipolku);               // Haetaan funktiolta lämpötila
         List<double> lampotilat = new List<double>();               // Luodaan lista lämpötiloille
-        string minPvm = DateTime.Now.ToString("dd.MM.yyyy");
+        string minPvm = DateTime.Now.ToString("dd.MM.yyyy");        // RASPBERRYSSÄ NÄMÄ EIVÄT TOIMINEET, JATKA SELVITTÄMISTÄ
         string minKlo = DateTime.Now.ToString("HH:mm:ss");
         string maxPvm = DateTime.Now.ToString("dd.MM.yyyy");
         string maxKlo = DateTime.Now.ToString("HH:mm:ss");
@@ -68,26 +68,29 @@ public class RaspTemp
                                                                           //  Console.WriteLine("Timer1 sisältä  " + HaeLampo(anturipolku));
                                                                           // Console.WriteLine("Timer1 sisältä lampötilat:  " + string.Join(" ", lampotilat[0]));
 
-            double keskiArvo = LaskeKeskiArvo(lampotilat);                // Kutsutaan keskiarvon laskevaa aliohjelmaa
-            double maxArvo = LaskeMaxArvo(lampotilat);                    // Kutsutaan Max lämpötilan laskevaa aliohjelmaa
             double minArvo = LaskeMinArvo(lampotilat);                    // Kutsutaan Min lämpötilan laskevaa aliohjelmaa
+            string minArvoMuotoiltu = string.Format("{0:0.0}", minArvo);
+            double keskiArvo = LaskeKeskiArvo(lampotilat);                // Kutsutaan keskiarvon laskevaa aliohjelmaa
+            string keskiArvoMuotoiltu = string.Format("{0:0.0}", keskiArvo);
+            double maxArvo = LaskeMaxArvo(lampotilat);                    // Kutsutaan Max lämpötilan laskevaa aliohjelmaa
+            string maxArvoMuotoiltu = string.Format("{0:0.0}", maxArvo);
 
-            Tulosta("L Ä M P Ö T I L A T", 24, 0);
+            Tulosta("L Ä M P Ö T I L A T", 24, 0);          // TULOSTETAAN OTSIKOT
             Tulosta("Min", 9, 3);
             Tulosta("Keskiarvo", 28, 3);
             Tulosta("Max", 51, 3);
-
-            Tulosta(minArvo.ToString(), 7, 5);
-            Tulosta(keskiArvo.ToString(), 29, 5);
-            Tulosta(maxArvo.ToString(), 50, 5);
-
             Tulosta("Lukujen määrä", 26, 8);
-            Tulosta(lampotilat.Count.ToString(), 31, 10);       // tulostaa lukujen määrän
 
-            Tulosta(minPvm, 6, 7);
-            Tulosta(minKlo, 7, 8);
-            Tulosta(maxPvm, 48, 7);
-            Tulosta(maxKlo, 49, 8);
+            Tulosta(minArvoMuotoiltu, 8, 5);                // TULOSTETAAN LÄMPÖTILAT
+            Tulosta(keskiArvoMuotoiltu, 30, 5);
+            Tulosta(maxArvoMuotoiltu, 50, 5);
+
+            Tulosta(lampotilat.Count.ToString(), 31, 10);   // tulostaa lukujen määrän
+
+            Tulosta(minPvm, 5, 7);                          // Tulostetaan se pvm/klo kun min saavutettu
+            Tulosta(minKlo, 6, 8);
+            Tulosta(maxPvm, 47, 7);                         // Tulostetaan se pvm/klo kun max saavutettu
+            Tulosta(maxKlo, 48, 8);
 
 
         },

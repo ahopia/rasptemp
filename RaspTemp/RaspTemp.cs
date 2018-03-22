@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 
 /// @author Arto Hopia
-/// @version 21.3.2018
+/// @version 22.3.2018
 /// <summary>
 /// Ohjelma lukee Raspberryssä 1-wire-anturin tietoa ja näyttää lämpötilan
 /// </summary>
@@ -64,6 +64,8 @@ public class RaspTemp
         string minKlo = DateTime.Now.ToString("HH:mm:ss");
         string maxPvm = DateTime.Now.ToString("dd.MM.yyyy");
         string maxKlo = DateTime.Now.ToString("HH:mm:ss");
+
+        Console.Clear();
 
         var timer1 = new System.Threading.Timer(delegate
         {

@@ -21,6 +21,9 @@ public class RaspTemp
     /// </summary>
     public static void Main()
     {
+        // TODO: PÄIVÄYKSEN TULOSTUS MIN / MAX LÄMPÖJEN ALLE
+        // TODO: RASPBERRYSSÄ EI TOIMI DateTime.Now --LÖYTYYKÖ PATCHI
+        // TODO: SÄHKÖPOSTIIN HÄLYTYS KUN RAJA-ARVO ON YLITETTY / ALITETTU
 
         /// <summary>
         /// Tunnistetaan käyttöjärjestelmä, koska anturin lämpätilatiedon sisältämä tiedosto on eri polussa Raspberryllä ja Windowsilla
@@ -87,9 +90,10 @@ public class RaspTemp
 
             Tulosta(lampotilat.Count.ToString(), 31, 10);   // tulostaa lukujen määrän
 
-            Tulosta(minPvm, 5, 7);                          // Tulostetaan se pvm/klo kun min saavutettu
+            // TULOSTAA, MUTTA TOISTAISEKSI VAIN NYKYHETKEN--KORJAA
+            Tulosta(minPvm, 5, 7);                          // Tulostetaan se pvm/klo kun min saavutettu -- TEE TALLENNUSFUNKTIO
             Tulosta(minKlo, 6, 8);
-            Tulosta(maxPvm, 47, 7);                         // Tulostetaan se pvm/klo kun max saavutettu
+            Tulosta(maxPvm, 47, 7);                         // Tulostetaan se pvm/klo kun max saavutettu -- TEE TALLENNUSFUNKTIO
             Tulosta(maxKlo, 48, 8);
 
 

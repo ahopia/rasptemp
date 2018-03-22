@@ -46,7 +46,7 @@ public class RaspTemp
 
 
         // Tyhjennä näyttö, tallenna alkukoordinaatit, ylin ja vasemmanpuoleisin
-        // Console.Clear();
+        Console.Clear();
         nollaRivi = Console.CursorTop + 2;      // tuunaa nollarivi sopivaan kohtaan
         nollaSarake = Console.CursorLeft + 5;   // tuunaa nollasarake sopivaan kohtaan
 
@@ -60,18 +60,18 @@ public class RaspTemp
         // Console.WriteLine("\r\n " + HaeLampo(anturipolku) + "\n");
         double listaanLisays = HaeLampo(anturipolku);               // Haetaan funktiolta lämpötila
         List<double> lampotilat = new List<double>();               // Luodaan lista lämpötiloille
-        string minPvm = DateTime.Now.ToString("dd.MM.yyyy");        // RASPBERRYSSÄ NÄMÄ EIVÄT TOIMINEET, JATKA SELVITTÄMISTÄ
-        string minKlo = DateTime.Now.ToString("HH:mm:ss");
-        string maxPvm = DateTime.Now.ToString("dd.MM.yyyy");
-        string maxKlo = DateTime.Now.ToString("HH:mm:ss");
-
-        Console.Clear();
+        string minPvm; // = DateTime.Now.ToString("dd.MM.yyyy");        // RASPBERRYSSÄ NÄMÄ EIVÄT TOIMINEET, JATKA SELVITTÄMISTÄ
+        string minKlo; // = DateTime.Now.ToString("HH:mm:ss");
+        string maxPvm; // = DateTime.Now.ToString("dd.MM.yyyy");
+        string maxKlo; // = DateTime.Now.ToString("HH:mm:ss");
+        double maxArvoVanha = Double.MinValue;
+        double minArvoVanha = Double.MaxValue;
 
         var timer1 = new System.Threading.Timer(delegate
         {
             lampotilat.Add(HaeLampo(anturipolku));                        // lisää: lämpötilan luku
                                                                           //  Console.WriteLine("Timer1 sisältä  " + HaeLampo(anturipolku));
-                                                                          // Console.WriteLine("Timer1 sisältä lampötilat:  " + string.Join(" ", lampotilat[0]));
+            string nykyArvoMuotoiltu = string.Format("{0:0.0}", HaeLampo(anturipolku));                                                             // Console.WriteLine("Timer1 sisältä lampötilat:  " + string.Join(" ", lampotilat[0]));
 
             double minArvo = LaskeMinArvo(lampotilat);                    // Kutsutaan Min lämpötilan laskevaa aliohjelmaa
             string minArvoMuotoiltu = string.Format("{0:0.0}", minArvo);
@@ -80,27 +80,42 @@ public class RaspTemp
             double maxArvo = LaskeMaxArvo(lampotilat);                    // Kutsutaan Max lämpötilan laskevaa aliohjelmaa
             string maxArvoMuotoiltu = string.Format("{0:0.0}", maxArvo);
 
+
             Tulosta("L Ä M P Ö T I L A T", 24, 0);          // TULOSTETAAN OTSIKOT
             Tulosta("Min", 9, 3);
             Tulosta("Keskiarvo", 28, 3);
             Tulosta("Max", 51, 3);
-            Tulosta("Lukujen määrä", 26, 8);
+            Tulosta("Mittauksia kpl", 26, 7);
+            Tulosta("Reaaliaikanen", 26, 12);
 
             Tulosta(minArvoMuotoiltu, 8, 5);                // TULOSTETAAN LÄMPÖTILAT
             Tulosta(keskiArvoMuotoiltu, 30, 5);
             Tulosta(maxArvoMuotoiltu, 50, 5);
+            Tulosta(nykyArvoMuotoiltu, 30, 14); // tähän nykyarvo
 
-            Tulosta(lampotilat.Count.ToString(), 31, 10);   // tulostaa lukujen määrän
+            // Tulostaa max-arvon ja päivittää päiväyksen
+            if (maxArvoVanha < double.Parse(maxArvoMuotoiltu))
+            {
+                maxArvoVanha = double.Parse(maxArvoMuotoiltu);
+                maxPvm = DateTime.Now.ToString("dd.MM.yyyy");
+                maxKlo = DateTime.Now.ToString("HH:mm:ss");
+                Tulosta(maxPvm, 47, 7);                         // Tulostetaan se pvm/klo kun max saavutettu -- TEE TALLENNUSFUNKTIO
+                Tulosta(maxKlo, 48, 8);
+            }
 
-            // TULOSTAA, MUTTA TOISTAISEKSI VAIN NYKYHETKEN--KORJAA
-            Tulosta(minPvm, 5, 7);                          // Tulostetaan se pvm/klo kun min saavutettu -- TEE TALLENNUSFUNKTIO
-            Tulosta(minKlo, 6, 8);
-            Tulosta(maxPvm, 47, 7);                         // Tulostetaan se pvm/klo kun max saavutettu -- TEE TALLENNUSFUNKTIO
-            Tulosta(maxKlo, 48, 8);
-
+            // Tulostaa min-arvon ja päivittää päiväyksen
+            if (minArvoVanha > double.Parse(minArvoMuotoiltu))
+            {
+                minArvoVanha = double.Parse(minArvoMuotoiltu);
+                minPvm = DateTime.Now.ToString("dd.MM.yyyy");
+                minKlo = DateTime.Now.ToString("HH:mm:ss");
+                Tulosta(minPvm, 5, 7);                          // Tulostetaan se pvm/klo kun min saavutettu -- TEE TALLENNUSFUNKTIO
+                Tulosta(minKlo, 6, 8);
+            }
+            Tulosta(lampotilat.Count.ToString(), 31, 9);   // tulostaa lukujen määrän
 
         },
-        null, 0, 1000);  // TIMER, TESTATAAN TÄTÄ
+        null, 0, 2000);  // TIMER, aika millisekuntteina
 
 
         lampotilat.Add(listaanLisays);                              // lisätään lämpötila listaan
@@ -147,7 +162,13 @@ public class RaspTemp
     {
         double max = Double.MinValue;
         if (lampotilat.Count > 0) max = lampotilat[0];               // alustetaan max arvo listan ensimmäisellä luvulla
-        foreach (double luku in lampotilat) if (max <= luku) max = luku;
+        foreach (double luku in lampotilat)
+        {
+            if (max <= luku)
+            {
+                max = luku;
+            }
+        }
         return max;
     }
 

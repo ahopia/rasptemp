@@ -80,6 +80,9 @@ public class RaspTemp
             double maxArvo = LaskeMaxArvo(lampotilat);                    // Kutsutaan Max lämpötilan laskevaa aliohjelmaa
             string maxArvoMuotoiltu = string.Format("{0:0.0}", maxArvo);
 
+            // jos listan mittausten merkkimäärä kasvaa riittävän suureksi, 
+            // rajoitetaan mitausarvot tuhanteen mittaukseen poistamalla vanhin merkki listan alusta
+            if (lampotilat.Count >= 1001) lampotilat.RemoveAt(0);
 
             Tulosta("L Ä M P Ö T I L A T", 24, 0);          // TULOSTETAAN OTSIKOT
             Tulosta("Min", 9, 3);
@@ -115,7 +118,7 @@ public class RaspTemp
             Tulosta(lampotilat.Count.ToString(), 31, 9);   // tulostaa lukujen määrän
 
         },
-        null, 0, 2000);  // TIMER, aika millisekuntteina
+        null, 0, 1000);  // TIMER, aika millisekuntteina
 
 
         lampotilat.Add(listaanLisays);                              // lisätään lämpötila listaan

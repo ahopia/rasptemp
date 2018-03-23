@@ -64,6 +64,7 @@ public class RaspTemp
         string minKlo; // = DateTime.Now.ToString("HH:mm:ss");
         string maxPvm; // = DateTime.Now.ToString("dd.MM.yyyy");
         string maxKlo; // = DateTime.Now.ToString("HH:mm:ss");
+        string aikaNyt;
         double maxArvoVanha = Double.MinValue;
         double minArvoVanha = Double.MaxValue;
 
@@ -94,7 +95,10 @@ public class RaspTemp
             Tulosta(minArvoMuotoiltu, 8, 5);                // TULOSTETAAN LÄMPÖTILAT
             Tulosta(keskiArvoMuotoiltu, 30, 5);
             Tulosta(maxArvoMuotoiltu, 50, 5);
-            Tulosta(nykyArvoMuotoiltu, 30, 14); // tähän nykyarvo
+            Tulosta(nykyArvoMuotoiltu, 30, 15); // tähän nykyarvo
+
+            aikaNyt = DateTime.Now.ToString("HH:mm:ss");
+            Tulosta(aikaNyt, 28, 13);
 
             // Tulostaa max-arvon ja päivittää päiväyksen
             if (maxArvoVanha < double.Parse(maxArvoMuotoiltu))

@@ -43,6 +43,12 @@ public class RaspTemp
         }
 
 
+        // Aluksi pyydetään käyttäjältä hälytysraja
+        double halyRaja = annaHalyRaja();
+        Console.WriteLine("\npaina jotain jatkaaksesi.");
+        Console.ReadLine();
+
+
         // Tyhjennä näyttö, tallenna alkukoordinaatit, ylin ja vasemmanpuoleisin
         Console.Clear();
         // tuunaa nollarivi ja sarake sopivaan kohtaan
@@ -52,7 +58,7 @@ public class RaspTemp
         Console.WriteLine();
 
         // Sähköpostin lähetykseen liittyvät alustukset, säädä hälyRajalla sähköpostihälytyksen kynnystä
-        double halyRaja = 26;
+        // double halyRaja = 26;
         string halytysOtsikko = "HÄLYTYS, lämpötila yli " + halyRaja + " astetta";
         string halytysViesti = "HÄLYTYS, lämpötila on nyt yli " + halyRaja + " astetta.";
 
@@ -132,7 +138,7 @@ public class RaspTemp
             }
             Tulosta(lampotilat.Count.ToString(), 31, 9);   // tulostaa lukujen määrän
 
-            // Hälytyksen lähetys
+            // Hälytyksen lähetys, jos ei ole jo lähetetty (false)
             if (double.Parse(lampoNyt) > halyRaja && halyLähetetty == false)
             {
                 halyLähetetty = true;
@@ -141,14 +147,14 @@ public class RaspTemp
                 Tulosta("Hälytys, lämpötila yli " + halyRaja + " astetta: " + lahetysKuittaus, 9, 18);
             } // LISÄÄ UUDELLEEN LÄHETYS, JOS LÄHETYS EPÄONNISTUI
 
-            // Hälyksen kuittaus, lämpö pitää olla pudonnut 2 astetta, ennen kuin lähetetään kuittaus
+            // Hälyksen kuittaus
             // Hälytys pitää olla lähetetty (true), jotta voidaan lähetttää kuittaus
-            if (double.Parse(lampoNyt) < halyRaja - 2 && halyLähetetty == true)
+            if (double.Parse(lampoNyt) < halyRaja && halyLähetetty == true)
             {
                 halyLähetetty = false;
                 string lahetysKuittaus = lahetaPosti(halytysPoistuiOtsikko, halytysPoistuiViesti);
                 Tulosta("                                                                            ", 1, 18);
-                Tulosta("Hälytys poistui: " + lahetysKuittaus, 15, 18);
+                Tulosta("Hälytys poistui: " + lahetysKuittaus, 17, 18);
             }// LISÄÄ UUDELLEEN LÄHETYS, JOS LÄHETYS EPÄONNISTUI
 
         },
@@ -186,17 +192,17 @@ public class RaspTemp
         return lampoC;
     }
 
-
-    public static double LaskeKeskiArvo(List<double> lampotilat)    // Laskee keskiarvon
+    // Lasketaan keski-arvo
+    public static double LaskeKeskiArvo(List<double> lampotilat)
     {
-        int jakaja = lampotilat.Count;                              // listan lukujen määrä
+        int jakaja = lampotilat.Count;
         double summa = 0.0;
-        foreach (double luku in lampotilat) summa += luku;                         // käydään luvut läpi// lasketaan luvut yhteen
-        double keskiarvo = summa / jakaja;                          // lasketan keskiarvo
+        foreach (double luku in lampotilat) summa += luku;
+        double keskiarvo = summa / jakaja;
         return keskiarvo;
     }
 
-    public static double LaskeMaxArvo(List<double> lampotilat)      // laskee Max arvon
+    public static double LaskeMaxArvo(List<double> lampotilat)
     {
         double max = Double.MinValue;
         if (lampotilat.Count > 0) max = lampotilat[0];               // alustetaan max arvo listan ensimmäisellä luvulla
@@ -210,7 +216,7 @@ public class RaspTemp
         return max;
     }
 
-    public static double LaskeMinArvo(List<double> lampotilat)      // laskee Max arvon
+    public static double LaskeMinArvo(List<double> lampotilat)
     {
         double min = Double.MaxValue;
         if (lampotilat.Count > 0) min = lampotilat[0];              // alustetaan min arvo listan ensimmäisellä luvulla
@@ -222,14 +228,13 @@ public class RaspTemp
 
     public static int nollaRivi;
     public static int nollaSarake;
-
-    public static void Tulosta(string viesti, int x, int y)                 // TULOSTUS
+    // Tulostus x ja y koordinaattien mukaan
+    public static void Tulosta(string viesti, int x, int y)
     {
         try
         {
-            Console.SetCursorPosition(nollaSarake + x, nollaRivi + y);        // NÄILLÄ SAA TULOSTUMAAN OIKEAAN KOHTAAN
-                                                                              //      Console.ForegroundColor = ConsoleColor.Green;
-                                                                              // Console.ForegroundColor = ConsoleColor.Gray;
+            Console.SetCursorPosition(nollaSarake + x, nollaRivi + y);
+            // Console.ForegroundColor = ConsoleColor.Green;
             Console.Write(viesti);
         }
         catch (ArgumentOutOfRangeException e)
@@ -255,12 +260,12 @@ public class RaspTemp
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
             client.UseDefaultCredentials = false;
             // MUUTA TILI JA SALASANA OIKEIKSI
-            client.Credentials = new NetworkCredential("raspi.XXXXXXX@gmail.com",
+            client.Credentials = new NetworkCredential("raspi.X@gmail.com",
     "SALASANA");
             MailMessage msg = new MailMessage();
-            msg.To.Add("raspi.XXXXXXX@gmail.com");
-            msg.From = new MailAddress("raspi.XXXXXXX@gmail.com");
-            msg.Subject = otsikko; 
+            msg.To.Add("raspi.X@gmail.com");
+            msg.From = new MailAddress("raspi.X@gmail.com");
+            msg.Subject = otsikko;
             msg.Body = sisalto;
             client.Send(msg);
             //  Console.WriteLine("Lähetys onnistui");
@@ -270,10 +275,44 @@ public class RaspTemp
         {
             poikkeus = ex.Message;
             // Console.WriteLine(poikkeus);
-            Console.WriteLine("Lähetys epäonnistui");
+            // Console.WriteLine("Lähetys epäonnistui");
             return "lähetys epäonnistui";
         }
 
+    }
+
+    // Kysytään käyttäjältä hälyrajaa, jos tyhjä, ei rajoissa tai 
+    // merkkiä ei tunnisteta, asetetaan oletus 1000 astetta
+    public static double annaHalyRaja()
+    {
+        double parsittuRaja;
+        double rajaArvo = 1000;
+        Console.WriteLine("\nAnna ylilämmön hälytysraja -40 - + 40 Celsiusasteen väliltä.\n");
+        string annaLuku = Console.ReadLine();
+        if (annaLuku.Length == 0)          // jos tyhjä jono
+        {
+            Console.WriteLine("\nHälytysrajaa ei asetettu.");
+            parsittuRaja = 1000;
+        }
+        else if (double.TryParse(annaLuku, out parsittuRaja))
+        {
+            if (parsittuRaja < -40 || parsittuRaja > 40)  // jos ei sallituissa rajoissa
+            {
+                Console.WriteLine("\nLuku ei ole sallituissa rajoissa, hälytystä ei asetettu.");
+                parsittuRaja = 1000;
+            }
+            else
+            {
+                Console.WriteLine("\nHälytys annetaan kun lämpötila on suurempi kuin " + parsittuRaja + " astetta");
+                rajaArvo = parsittuRaja;
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nLukua ei tunnistettu, hälytys ei käytössä.");
+            rajaArvo = 1000;
+        }
+        return rajaArvo;
     }
 
 

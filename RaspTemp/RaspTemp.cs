@@ -8,6 +8,8 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Mail;
 
 /// @author Arto Hopia
 /// @version 22.3.2018
@@ -21,10 +23,6 @@ public class RaspTemp
     /// </summary>
     public static void Main()
     {
-        // TODO: PÄIVÄYKSEN TULOSTUS MIN / MAX LÄMPÖJEN ALLE
-        // TODO: RASPBERRYSSÄ EI TOIMI DateTime.Now --LÖYTYYKÖ PATCHI
-        // TODO: SÄHKÖPOSTIIN HÄLYTYS KUN RAJA-ARVO ON YLITETTY / ALITETTU
-
         /// <summary>
         /// Tunnistetaan käyttöjärjestelmä, koska anturin lämpätilatiedon sisältämä tiedosto on eri polussa Raspberryllä ja Windowsilla
         /// Käyttöjärjestelmästä riippuen otetaan oikea polku käyttöön automaattisesti
@@ -47,20 +45,27 @@ public class RaspTemp
 
         // Tyhjennä näyttö, tallenna alkukoordinaatit, ylin ja vasemmanpuoleisin
         Console.Clear();
-        nollaRivi = Console.CursorTop + 2;      // tuunaa nollarivi sopivaan kohtaan
-        nollaSarake = Console.CursorLeft + 5;   // tuunaa nollasarake sopivaan kohtaan
+        // tuunaa nollarivi ja sarake sopivaan kohtaan
+        nollaRivi = Console.CursorTop + 2;
+        nollaSarake = Console.CursorLeft + 5;
 
-        //
-        // Tulosta("Toimii", 10, 16);
-        // Tulosta("ARTON TESTITULOSTUS", 8, -1);
         Console.WriteLine();
 
+        // Sähköpostin lähetykseen liittyvät alustukset, säädä hälyRajalla sähköpostihälytyksen kynnystä
+        double halyRaja = 26;
+        string halytysOtsikko = "HÄLYTYS, lämpötila yli " + halyRaja + " astetta";
+        string halytysViesti = "HÄLYTYS, lämpötila on nyt yli " + halyRaja + " astetta.";
+
+        string halytysPoistuiOtsikko = "POISTUI, HÄLYTYS, lämpötila yli " + halyRaja + " astetta";
+        string halytysPoistuiViesti = "POISTUI, HÄLYTYS, lämpötila on nyt yli " + halyRaja + " astetta.";
+
+        bool halyLähetetty = false;
+
         Console.WriteLine(" ");
-        //Console.WriteLine();
         // Console.WriteLine("\r\n " + HaeLampo(anturipolku) + "\n");
-        double listaanLisays = HaeLampo(anturipolku);               // Haetaan funktiolta lämpötila
+        double listaanLisays = HaeLampo(anturipolku);               // Alustetaan listaanlisäys 
         List<double> lampotilat = new List<double>();               // Luodaan lista lämpötiloille
-        string minPvm; // = DateTime.Now.ToString("dd.MM.yyyy");        // RASPBERRYSSÄ NÄMÄ EIVÄT TOIMINEET, JATKA SELVITTÄMISTÄ
+        string minPvm; // = DateTime.Now.ToString("dd.MM.yyyy");    // RASPBERRYSSÄ NÄMÄ EIVÄT AINA TOIMINEET, JATKA SELVITTÄMISTÄ
         string minKlo; // = DateTime.Now.ToString("HH:mm:ss");
         string maxPvm; // = DateTime.Now.ToString("dd.MM.yyyy");
         string maxKlo; // = DateTime.Now.ToString("HH:mm:ss");
@@ -70,32 +75,38 @@ public class RaspTemp
 
         var timer1 = new System.Threading.Timer(delegate
         {
-            lampotilat.Add(HaeLampo(anturipolku));                        // lisää: lämpötilan luku
-                                                                          //  Console.WriteLine("Timer1 sisältä  " + HaeLampo(anturipolku));
-            string nykyArvoMuotoiltu = string.Format("{0:0.0}", HaeLampo(anturipolku));                                                             // Console.WriteLine("Timer1 sisältä lampötilat:  " + string.Join(" ", lampotilat[0]));
+            // Haetun lämpötilan lisäys listaan
+            lampotilat.Add(HaeLampo(anturipolku));
 
-            double minArvo = LaskeMinArvo(lampotilat);                    // Kutsutaan Min lämpötilan laskevaa aliohjelmaa
+            string lampoNyt = string.Format("{0:0.0}", HaeLampo(anturipolku));
+
+            // Lämpötilojen haku ja muotoilu tulostusformaattiin
+            double minArvo = LaskeMinArvo(lampotilat);
             string minArvoMuotoiltu = string.Format("{0:0.0}", minArvo);
-            double keskiArvo = LaskeKeskiArvo(lampotilat);                // Kutsutaan keskiarvon laskevaa aliohjelmaa
+            double keskiArvo = LaskeKeskiArvo(lampotilat);
             string keskiArvoMuotoiltu = string.Format("{0:0.0}", keskiArvo);
-            double maxArvo = LaskeMaxArvo(lampotilat);                    // Kutsutaan Max lämpötilan laskevaa aliohjelmaa
+            double maxArvo = LaskeMaxArvo(lampotilat);
             string maxArvoMuotoiltu = string.Format("{0:0.0}", maxArvo);
 
             // jos listan mittausten merkkimäärä kasvaa riittävän suureksi, 
             // rajoitetaan mitausarvot tuhanteen mittaukseen poistamalla vanhin merkki listan alusta
             if (lampotilat.Count >= 1001) lampotilat.RemoveAt(0);
 
-            Tulosta("L Ä M P Ö T I L A T", 24, 0);          // TULOSTETAAN OTSIKOT
+            // TULOSTETAAN OTSIKOT
+            Tulosta("L Ä M P Ö T I L A T", 24, 0);
             Tulosta("Min", 9, 3);
             Tulosta("Keskiarvo", 28, 3);
             Tulosta("Max", 51, 3);
             Tulosta("Mittauksia kpl", 26, 7);
             Tulosta("Reaaliaikanen", 26, 12);
+            Tulosta("Hälyraja", 6, 12);
+            Tulosta("> " + halyRaja, 7, 14);
 
-            Tulosta(minArvoMuotoiltu, 8, 5);                // TULOSTETAAN LÄMPÖTILAT
+            // TULOSTETAAN LÄMPÖTILAT
+            Tulosta(minArvoMuotoiltu, 8, 5);
             Tulosta(keskiArvoMuotoiltu, 30, 5);
             Tulosta(maxArvoMuotoiltu, 50, 5);
-            Tulosta(nykyArvoMuotoiltu, 30, 15); // tähän nykyarvo
+            Tulosta(lampoNyt, 30, 15); // tähän nykyarvo
 
             aikaNyt = DateTime.Now.ToString("HH:mm:ss");
             Tulosta(aikaNyt, 28, 13);
@@ -121,13 +132,33 @@ public class RaspTemp
             }
             Tulosta(lampotilat.Count.ToString(), 31, 9);   // tulostaa lukujen määrän
 
+            // Hälytyksen lähetys
+            if (double.Parse(lampoNyt) > halyRaja && halyLähetetty == false)
+            {
+                halyLähetetty = true;
+                string lahetysKuittaus = lahetaPosti(halytysOtsikko, halytysViesti);
+                Tulosta("                                                                            ", 1, 18);
+                Tulosta("Hälytys, lämpötila yli " + halyRaja + " astetta: " + lahetysKuittaus, 9, 18);
+            } // LISÄÄ UUDELLEEN LÄHETYS, JOS LÄHETYS EPÄONNISTUI
+
+            // Hälyksen kuittaus, lämpö pitää olla pudonnut 2 astetta, ennen kuin lähetetään kuittaus
+            // Hälytys pitää olla lähetetty (true), jotta voidaan lähetttää kuittaus
+            if (double.Parse(lampoNyt) < halyRaja - 2 && halyLähetetty == true)
+            {
+                halyLähetetty = false;
+                string lahetysKuittaus = lahetaPosti(halytysPoistuiOtsikko, halytysPoistuiViesti);
+                Tulosta("                                                                            ", 1, 18);
+                Tulosta("Hälytys poistui: " + lahetysKuittaus, 15, 18);
+            }// LISÄÄ UUDELLEEN LÄHETYS, JOS LÄHETYS EPÄONNISTUI
+
         },
         null, 0, 1000);  // TIMER, aika millisekuntteina
 
-
-        lampotilat.Add(listaanLisays);                              // lisätään lämpötila listaan
+        // lisätään lämpötila listaan
+        lampotilat.Add(listaanLisays);
 
         // Console.WriteLine("\n" + anturipolku + "\n");
+
         Console.ReadLine();
     }
 
@@ -197,7 +228,7 @@ public class RaspTemp
         try
         {
             Console.SetCursorPosition(nollaSarake + x, nollaRivi + y);        // NÄILLÄ SAA TULOSTUMAAN OIKEAAN KOHTAAN
-                                                                              // Console.ForegroundColor = ConsoleColor.DarkYellow;
+                                                                              //      Console.ForegroundColor = ConsoleColor.Green;
                                                                               // Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(viesti);
         }
@@ -205,6 +236,42 @@ public class RaspTemp
         {
             Console.Clear();
             Console.WriteLine(e.Message);
+        }
+
+    }
+
+    // https://www.mikrocontroller.net/topic/415557 Pohja täältä
+    public static string lahetaPosti(string otsikko, string sisalto)
+    {
+        string poikkeus = string.Empty;
+        try
+        {
+            System.Net.ServicePointManager.ServerCertificateValidationCallback +=
+    (o, certificate, chain, errors) => true;
+            SmtpClient client = new SmtpClient("smtp.gmail.com");
+            client.Port = 587;//465  587
+            client.EnableSsl = true;
+            client.Timeout = 20000;
+            client.DeliveryMethod = SmtpDeliveryMethod.Network;
+            client.UseDefaultCredentials = false;
+            // MUUTA TILI JA SALASANA OIKEIKSI
+            client.Credentials = new NetworkCredential("raspi.XXXXXXX@gmail.com",
+    "SALASANA");
+            MailMessage msg = new MailMessage();
+            msg.To.Add("raspi.XXXXXXX@gmail.com");
+            msg.From = new MailAddress("raspi.XXXXXXX@gmail.com");
+            msg.Subject = otsikko; 
+            msg.Body = sisalto;
+            client.Send(msg);
+            //  Console.WriteLine("Lähetys onnistui");
+            return "lähetys onnistui";
+        }
+        catch (Exception ex)
+        {
+            poikkeus = ex.Message;
+            // Console.WriteLine(poikkeus);
+            Console.WriteLine("Lähetys epäonnistui");
+            return "lähetys epäonnistui";
         }
 
     }

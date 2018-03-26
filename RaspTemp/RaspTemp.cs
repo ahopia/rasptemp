@@ -16,6 +16,8 @@ using System.Net.Mail;
 /// </summary>
 public class RaspTemp
 {
+    // TODO: Olen testannut aliohjelmia, kts Demo 6, teht 2a ja teht 5 sekä Demo 7, teht 1 ja Demo 8, teht 4a ja Demo 9, teht 1 ja teht 3
+    
     /// <summary>
     /// Pääohjelma Raspberry Pi:n 1-Wire-anturin lukemiseksi
     /// </summary>

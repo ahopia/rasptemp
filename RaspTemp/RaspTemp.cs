@@ -1,9 +1,4 @@
-﻿// This example demonstrates the 
-//     Console.CursorLeft and 
-//     Console.CursorTop properties, and the
-//     Console.SetCursorPosition and 
-//     Console.Clear methods.
-using System;
+﻿using System;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
@@ -12,73 +7,93 @@ using System.Net;
 using System.Net.Mail;
 
 /// @author Arto Hopia
-/// @version 22.3.2018
+/// @version 26.3.2018
+/// 
 /// <summary>
-/// Ohjelma lukee Raspberryssä 1-wire-anturin tietoa ja näyttää lämpötilan
+/// Ohjelma lukee Raspberry Pi:n 1-wire-anturin tietoa ja näyttää lämpötilan minimi-
+/// maksimi- ja keskiarvon sekä lähettää hälytyksen sähköpostiin kun käyttäjän
+/// antama maksimilämpätila on saavutettu.
 /// </summary>
 public class RaspTemp
 {
     /// <summary>
-    /// Testausta vielä
+    /// Pääohjelma Raspberry Pi:n 1-Wire-anturin lukemiseksi
     /// </summary>
     public static void Main()
     {
         /// <summary>
-        /// Tunnistetaan käyttöjärjestelmä, koska anturin lämpätilatiedon sisältämä tiedosto on eri polussa Raspberryllä ja Windowsilla
-        /// Käyttöjärjestelmästä riippuen otetaan oikea polku käyttöön automaattisesti
+        /// Tunnistetaan käyttöjärjestelmä, koska anturin lämpätilatiedon sisältämä 
+        /// tiedosto on eri polussa Raspberryllä ja Windowsilla.
+        /// Käyttöjärjestelmästä riippuen otetaan oikea polku käyttöön automaattisesti.
         /// </summary>
-        /// <param name="anturipolku">Anturin polku</param>
+        /// <param name="anturipolku">1-Wire-anturin polku</param>
         int p = (int)Environment.OSVersion.Platform;
-        String anturipolku;                                                  // Hakupolun alustus
-        if ((p == 4) || (p == 6))                                            // Valinta Windowsin ja Rasbianin välillä automaattisesti
+        String anturipolku;
+        if ((p == 4) || (p == 6))
         {
+            // Käyttöjäjestelmä on Linux. p=4 Raspberryssä/Linuxissa
             Environment.SetEnvironmentVariable("MONO_MANAGED_WATCHER", "1");
-            //  Console.WriteLine("Käyttöjäjestelmä on Linux");                  // p=4 Linuxissa
-            anturipolku = "/sys/devices/w1_bus_master1/";                    // Hakupolku Raspberryyn
+            // Hakupolku Raspberryyn
+            anturipolku = "/sys/devices/w1_bus_master1/";
         }
         else
         {
-            //  Console.WriteLine("Käyttöjäjestelmä on Windows");                // p=2 Windowsissa 
-            anturipolku = "C:/Ohjelmointi/harjoitustyo/RaspTemp/RaspTemp";   // Hakupolku Windowsiin
+            // Käyttöjäjestelmä on Windows. p=2 Windowsissa 
+            anturipolku = "C:/Ohjelmointi/harjoitustyo/RaspTemp/RaspTemp";
         }
-
 
         // Aluksi pyydetään käyttäjältä hälytysraja
         double halyRaja = annaHalyRaja();
         Console.WriteLine("\npaina jotain jatkaaksesi.");
         Console.ReadLine();
 
-
         // Tyhjennä näyttö, tallenna alkukoordinaatit, ylin ja vasemmanpuoleisin
+        // Aseta nollarivi ja -sarake sopivaan kohtaan
+        // Muuttamalla numeroarvoja Console.CursorTop ja Console.CursorLeft perässä,
+        // voidaan säätää koko näkymän sijaintia konsolinäytöllä
         Console.Clear();
-        // tuunaa nollarivi ja sarake sopivaan kohtaan
         nollaRivi = Console.CursorTop + 2;
         nollaSarake = Console.CursorLeft + 5;
 
-        Console.WriteLine();
-
-        // Sähköpostin lähetykseen liittyvät alustukset, säädä hälyRajalla sähköpostihälytyksen kynnystä
-        // double halyRaja = 26;
+        // Sähköpostin lähetykseen liittyvät alustukset
+        // Hälytys- ja poistumisviestien otsikot ja viestit
         string halytysOtsikko = "HÄLYTYS, lämpötila yli " + halyRaja + " astetta";
         string halytysViesti = "HÄLYTYS, lämpötila on nyt yli " + halyRaja + " astetta.";
 
         string halytysPoistuiOtsikko = "POISTUI, HÄLYTYS, lämpötila yli " + halyRaja + " astetta";
         string halytysPoistuiViesti = "POISTUI, HÄLYTYS, lämpötila on nyt yli " + halyRaja + " astetta.";
 
+        // Käytetään idikoimaan onko viesti lähetetty, jotta lähetetään 
+        // poistumisviesti vain, jos hälytys on lähetetty
         bool halyLähetetty = false;
 
-        Console.WriteLine(" ");
-        // Console.WriteLine("\r\n " + HaeLampo(anturipolku) + "\n");
-        double listaanLisays = HaeLampo(anturipolku);               // Alustetaan listaanlisäys 
+        // Alustetaan listaanlisäys polkutiedolla
+        double listaanLisays = HaeLampo(anturipolku);
         List<double> lampotilat = new List<double>();               // Luodaan lista lämpötiloille
-        string minPvm; // = DateTime.Now.ToString("dd.MM.yyyy");    // RASPBERRYSSÄ NÄMÄ EIVÄT AINA TOIMINEET, JATKA SELVITTÄMISTÄ
-        string minKlo; // = DateTime.Now.ToString("HH:mm:ss");
-        string maxPvm; // = DateTime.Now.ToString("dd.MM.yyyy");
-        string maxKlo; // = DateTime.Now.ToString("HH:mm:ss");
+
+        // Alustetaan lämpötilojen aikaleimat
+        string minPvm;
+        string minKlo;
+        string maxPvm;
+        string maxKlo;
         string aikaNyt;
+
+        // Alustetaan min- ja max lämpötilat äärilaitaan
         double maxArvoVanha = Double.MinValue;
         double minArvoVanha = Double.MaxValue;
 
+        /// <summary>
+        /// Tehtävänä hoitaa kaikki ajastukseen liittyvät asiat, ajastus asetettu 1000ms
+        /// Täältä luetaan lämpötilan sisältävää tiedostoa ja kutsutaan kaikkia muita aliohjelmia.
+        /// </summary>
+        /// <param name="lampoNyt">Reaaliaikainen lämpötila</param>
+        /// <param name="aikaNyt">Reaaliaikainen aika</param>
+        /// <param name="minArvo">Lämpötilan minimiarvo</param>
+        /// <param name="minArvoMuotoiltu">Muotoiltu minimiarvo tulostusta varten</param>
+        /// <param name="keskiArvo">Lämpötilojen keskiarvo</param>
+        /// <param name="keskiArvoMuotoiltu">Muotoiltu lämpötilojen keskiarvo tulostusta varten</param>
+        /// <param name="maxArvo">Lämpötilan maksimiarvo</param>
+        /// <param name="maxArvoMuotoiltu">Muotoiltu lämpötilan maksimiarvo tulostusta varten</param>
         var timer1 = new System.Threading.Timer(delegate
         {
             // Haetun lämpötilan lisäys listaan
@@ -108,12 +123,12 @@ public class RaspTemp
             Tulosta("Hälyraja", 6, 12);
             Tulosta("> " + halyRaja, 7, 14);
 
-            // TULOSTETAAN LÄMPÖTILAT
+            // Tulostetaan lämpötilat
             Tulosta(minArvoMuotoiltu, 8, 5);
             Tulosta(keskiArvoMuotoiltu, 30, 5);
             Tulosta(maxArvoMuotoiltu, 50, 5);
-            Tulosta(lampoNyt, 30, 15); // tähän nykyarvo
-
+            Tulosta(lampoNyt, 30, 15);
+            // Muotoillaan ja tulostetaan reaaliaikainen aikaleima
             aikaNyt = DateTime.Now.ToString("HH:mm:ss");
             Tulosta(aikaNyt, 28, 13);
 
@@ -133,40 +148,45 @@ public class RaspTemp
                 minArvoVanha = double.Parse(minArvoMuotoiltu);
                 minPvm = DateTime.Now.ToString("dd.MM.yyyy");
                 minKlo = DateTime.Now.ToString("HH:mm:ss");
-                Tulosta(minPvm, 5, 7);                          // Tulostetaan se pvm/klo kun min saavutettu -- TEE TALLENNUSFUNKTIO
+                Tulosta(minPvm, 5, 7);
                 Tulosta(minKlo, 6, 8);
             }
-            Tulosta(lampotilat.Count.ToString(), 31, 9);   // tulostaa lukujen määrän
 
-            // Hälytyksen lähetys, jos ei ole jo lähetetty (false)
+            // Tulostaa mittaustulosten lukujen määrän
+            Tulosta(lampotilat.Count.ToString(), 31, 9);
+
+            // Lähetetään hälytys, jos ei ole jo lähetetty (=false)
             if (double.Parse(lampoNyt) > halyRaja && halyLähetetty == false)
             {
                 halyLähetetty = true;
-                string lahetysKuittaus = lahetaPosti(halytysOtsikko, halytysViesti);
+                string lahetysKuittaus = LahetaPosti(halytysOtsikko, halytysViesti);
                 Tulosta("                                                                            ", 1, 18);
                 Tulosta("Hälytys, lämpötila yli " + halyRaja + " astetta: " + lahetysKuittaus, 9, 18);
-            } // LISÄÄ UUDELLEEN LÄHETYS, JOS LÄHETYS EPÄONNISTUI
+            }
 
             // Hälyksen kuittaus
-            // Hälytys pitää olla lähetetty (true), jotta voidaan lähetttää kuittaus
+            // Hälytys pitää olla lähetetty (=true), jotta voidaan lähetttää kuittaus
             if (double.Parse(lampoNyt) < halyRaja && halyLähetetty == true)
             {
                 halyLähetetty = false;
-                string lahetysKuittaus = lahetaPosti(halytysPoistuiOtsikko, halytysPoistuiViesti);
+                string lahetysKuittaus = LahetaPosti(halytysPoistuiOtsikko, halytysPoistuiViesti);
                 Tulosta("                                                                            ", 1, 18);
                 Tulosta("Hälytys poistui: " + lahetysKuittaus, 17, 18);
-            }// LISÄÄ UUDELLEEN LÄHETYS, JOS LÄHETYS EPÄONNISTUI
+            }
+
 
         },
         null, 0, 1000);  // TIMER, aika millisekuntteina
 
-        // lisätään lämpötila listaan
+
+        // Lisätään haettu lämpötila listaan
         lampotilat.Add(listaanLisays);
 
-        // Console.WriteLine("\n" + anturipolku + "\n");
-
+        // Tärkeä rivi, ohjelma jää lukemaan ajastuksen hoitavaa 
+        // riviä "var timer1 = new System.Threading.Timer(delegate..."
         Console.ReadLine();
     }
+
 
     /// <summary>
     /// Lukee tiedoston w1_slave sisällön ja parsii sieltä lämpötilan "t=" merkkijonon jälkeen
@@ -189,10 +209,17 @@ public class RaspTemp
 
             // Console.WriteLine(string.Format(" 1-wire-anturin {0} lämpötila {1}C", tiedostoPolku.Name, lampoC));
         }
+
         return lampoC;
+
     }
 
-    // Lasketaan keski-arvo
+
+    /// <summary>
+    /// Laskee listan lämpötilojen keskiarvon
+    /// </summary>
+    /// <param name="lampotilat"></param>
+    /// <returns>Palauttaa keskiarvon</returns>
     public static double LaskeKeskiArvo(List<double> lampotilat)
     {
         int jakaja = lampotilat.Count;
@@ -202,6 +229,12 @@ public class RaspTemp
         return keskiarvo;
     }
 
+
+    /// <summary>
+    /// Etsiin ylimmän lämpötilan
+    /// </summary>
+    /// <param name="lampotilat"></param>
+    /// <returns>Palautetaan ylin lämpötila</returns>
     public static double LaskeMaxArvo(List<double> lampotilat)
     {
         double max = Double.MinValue;
@@ -216,6 +249,12 @@ public class RaspTemp
         return max;
     }
 
+
+    /// <summary>
+    /// Etsii alimman lämpötilan
+    /// </summary>
+    /// <param name="lampotilat"></param>
+    /// <returns>Palauttaa alimman lämpötilan</returns>
     public static double LaskeMinArvo(List<double> lampotilat)
     {
         double min = Double.MaxValue;
@@ -225,10 +264,17 @@ public class RaspTemp
     }
 
 
-
     public static int nollaRivi;
     public static int nollaSarake;
+
     // Tulostus x ja y koordinaattien mukaan
+
+    /// <summary>
+    /// Tämä funtio tulostaa annetun viestin, annettuihin x ja y koordinaatteihin 
+    /// </summary>
+    /// <param name="viesti"></param>
+    /// <param name="x">Tulostuksen x-koordinaatti</param>
+    /// <param name="y">Tulostuksen y-koordinaatti</param>
     public static void Tulosta(string viesti, int x, int y)
     {
         try
@@ -242,11 +288,17 @@ public class RaspTemp
             Console.Clear();
             Console.WriteLine(e.Message);
         }
-
     }
 
-    // https://www.mikrocontroller.net/topic/415557 Pohja täältä
-    public static string lahetaPosti(string otsikko, string sisalto)
+
+    // https://www.mikrocontroller.net/topic/415557 Pohja täältä, "Windows-pohja" ei toimi Raspberryssä
+    /// <summary>
+    /// Lähettää sähköpostia parametreina viestin otsikk ja sisältö
+    /// </summary>
+    /// <param name="otsikko">Viestin otsikko</param>
+    /// <param name="sisalto">Viestin sisältö</param>
+    /// <returns>Palauttaa tiedon, onnistuiko lähetys</returns>
+    public static string LahetaPosti(string otsikko, string sisalto)
     {
         string poikkeus = string.Empty;
         try
@@ -260,11 +312,11 @@ public class RaspTemp
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
             client.UseDefaultCredentials = false;
             // MUUTA TILI JA SALASANA OIKEIKSI
-            client.Credentials = new NetworkCredential("raspi.X@gmail.com",
+            client.Credentials = new NetworkCredential("raspi.varasto@gmail.com",
     "SALASANA");
             MailMessage msg = new MailMessage();
-            msg.To.Add("raspi.X@gmail.com");
-            msg.From = new MailAddress("raspi.X@gmail.com");
+            msg.To.Add("raspi.varasto@gmail.com");
+            msg.From = new MailAddress("raspi.varasto@gmail.com");
             msg.Subject = otsikko;
             msg.Body = sisalto;
             client.Send(msg);
@@ -281,8 +333,15 @@ public class RaspTemp
 
     }
 
-    // Kysytään käyttäjältä hälyrajaa, jos tyhjä, ei rajoissa tai 
-    // merkkiä ei tunnisteta, asetetaan oletus 1000 astetta
+
+    /// <summary>
+    /// Pyytää käyttäjältä ylilämmön hälytysrajaa, 
+    /// - jos rajaa ei anneta, asetetaan raja 1000 astetta
+    /// - jos lukua ei tunnisteta, asetetaan raja 1000 astetta
+    /// - jos luku ei ole väliltä -40 - +40, asetetaan raja 1000 astetta
+    /// - jos luku ok, asetetaan se raja-arvoksi
+    /// </summary>
+    /// <returns>Palautetaan raja-arvo</returns>
     public static double annaHalyRaja()
     {
         double parsittuRaja;
@@ -313,6 +372,7 @@ public class RaspTemp
             rajaArvo = 1000;
         }
         return rajaArvo;
+
     }
 
 
